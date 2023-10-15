@@ -31,8 +31,8 @@ public class Expense {
     private User user;
     
     @ManyToOne
-    @jakarta.persistence.JoinColumn(name = "FK_TYPE", referencedColumnName = "id", nullable = false)
-    private ExpenseType type;
+    @jakarta.persistence.JoinColumn(name = "FK_CATEGORY", referencedColumnName = "id", nullable = false)
+    private ExpenseCategory category;
     
     @Column(name = "date", nullable = false)
     private LocalDate date;

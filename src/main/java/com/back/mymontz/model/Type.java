@@ -1,0 +1,15 @@
+package com.back.mymontz.model;
+
+public enum Type {
+	HOUSE,
+	TRANSPORT,
+	SUPERMARKET,
+	RESTAURANTS,
+	HEALTH,
+	LEISURE,
+	CLOTHES,
+	EDUCATION,
+	PERSONAL_CARE,
+	DEBTS,
+	OTHERS
+}
