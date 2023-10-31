@@ -43,6 +43,6 @@ public class Expense {
     @Column(name = "note")
     private String note;
     
-    @Column(name = "image", length = 10000, nullable = false)
+    @Column(name = "image", length = 10000)
 	private byte[] image;
 }
