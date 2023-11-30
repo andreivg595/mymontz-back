@@ -1,4 +1,4 @@
-package com.back.mymontz.model;
+package com.back.mymontz.util;
 
 public enum Type {
 	HOUSE,

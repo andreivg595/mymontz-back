@@ -1,6 +1,9 @@
 package com.back.mymontz.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.back.mymontz.dto.AuthenticationRequest;
+import com.back.mymontz.dto.AuthenticationResponse;
+import com.back.mymontz.dto.RegisterRequest;
 import com.back.mymontz.model.User;
 import com.back.mymontz.service.UserService;
 
@@ -23,9 +29,14 @@ public class UserController {
 	@Autowired
 	private final UserService userService;
 	
-	@PostMapping("/user/register")
-	public User registerUser(@RequestBody User user) {
-		return userService.createUser(user);
+	@PostMapping("/auth/login")
+	public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
+		return ResponseEntity.ok(userService.login(request));
+	}
+	
+	@PostMapping("/auth/register")
+	public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
+		return ResponseEntity.ok(userService.register(request));
 	}
 	
 	@GetMapping("/user/{id}")
@@ -34,7 +45,7 @@ public class UserController {
 	}
 	
 	@GetMapping("/user/username/{username}")
-	public User getUserById(@PathVariable String username) {
+	public Optional<User> getUserById(@PathVariable String username) {
 		return userService.getUserByUsername(username);
 	}
 	

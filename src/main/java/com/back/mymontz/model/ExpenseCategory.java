@@ -1,5 +1,7 @@
 package com.back.mymontz.model;
 
+import com.back.mymontz.util.Type;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

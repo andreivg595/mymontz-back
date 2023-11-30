@@ -3,14 +3,21 @@ package com.back.mymontz.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.back.mymontz.config.JwtService;
+import com.back.mymontz.dto.AuthenticationRequest;
+import com.back.mymontz.dto.AuthenticationResponse;
+import com.back.mymontz.dto.RegisterRequest;
 import com.back.mymontz.exception.ResourceNotFoundException;
 import com.back.mymontz.exception.UserDuplicateException;
 import com.back.mymontz.exception.UserNotFoundException;
 import com.back.mymontz.model.User;
 import com.back.mymontz.repository.UserRepository;
+import com.back.mymontz.util.Role;
 
 @Component
 public class UserServiceImpl implements UserService {
@@ -20,16 +27,41 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-
+	
+	@Autowired
+	private JwtService jwtService;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
 	@Override
-	public User createUser(User user) {
-		if (userRepository.existsByUsername(user.getUsername())) {
-			throw new UserDuplicateException(user.getUsername());
-		}
-
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-		return userRepository.save(user);
+	public AuthenticationResponse login(AuthenticationRequest request) {
+		authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(
+						request.getUsername(),
+						request.getPassword()));
+		var user = userRepository.findByUsername(request.getUsername())
+				.orElseThrow();
+		var jwtToken = jwtService.generateToken(user);
+		return AuthenticationResponse.builder().token(jwtToken).build();
+	}
+	
+	@Override
+	public AuthenticationResponse register(RegisterRequest request) {
+		User user = User.builder()
+				.username(request.getUsername())
+				.password(passwordEncoder.encode(request.getPassword()))
+				.email(request.getEmail())
+				.role(Role.USER)
+				.build();
+		
+		userRepository.save(user);
+		
+		var jwtToken = jwtService.generateToken(user);
+		
+		return AuthenticationResponse.builder()
+				.token(jwtToken)
+				.build();
 	}
 
 	@Override
@@ -43,8 +75,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserByUsername(String username) {
-		User user = userRepository.findByUsername(username);
+	public Optional<User> getUserByUsername(String username) {
+		Optional<User> user = userRepository.findByUsername(username);
 		if (user != null) {
 			return user;
 		} else {
