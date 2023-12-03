@@ -1,7 +1,5 @@
 package com.back.mymontz.service;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
 import com.back.mymontz.dto.AuthenticationRequest;
@@ -18,7 +16,7 @@ public interface UserService {
 	
 	User getUserById(Long id);
 	
-	Optional<User> getUserByUsername(String username);
+	User getUserByUsername(String username);
 	
 	User updateUser(Long id, User user);
 	

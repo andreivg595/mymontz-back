@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.back.mymontz.exception.ResourceNotFoundException;
-import com.back.mymontz.exception.UserNotFoundException;
 import com.back.mymontz.model.Expense;
 import com.back.mymontz.model.ExpenseCategory;
 import com.back.mymontz.model.User;
@@ -30,7 +29,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 	@Override
 	public Expense createExpense(Expense expense) {
 		User user = userRepository.findById(expense.getUser().getId())
-				.orElseThrow(() -> new UserNotFoundException(expense.getUser().getId()));
+				.orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + expense.getUser().getId()));
 
 		ExpenseCategory expenseCategory = expenseCategoryRepository.findById(expense.getCategory().getId())
 				.orElseThrow(() -> new ResourceNotFoundException(
@@ -45,7 +44,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 	@Override
 	public List<Expense> getAllExpensesByUserId(Long id) {
 		if (!userRepository.existsById(id)) {
-			throw new UserNotFoundException(id);
+			throw new ResourceNotFoundException("User not exist with id: " + id);
 		}
 		
 		return expenseRepository.findByUserId(id);
@@ -54,7 +53,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 	@Override
 	public List<Expense> getAllExpensesBetweenDatesAndUserId(Long id, LocalDate startDate, LocalDate endDate) {
 		if (!userRepository.existsById(id)) {
-			throw new UserNotFoundException(id);
+			throw new ResourceNotFoundException("User not exist with id: " + id);
 		}
 		
 		return expenseRepository.findByDateBetweenAndUserId(startDate, endDate, id);
@@ -66,7 +65,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 				.orElseThrow(() -> new ResourceNotFoundException("Expense not exists with id: " + id));
 		
 		User user = userRepository.findById(expense.getUser().getId())
-				.orElseThrow(() -> new UserNotFoundException(expense.getUser().getId()));
+				.orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + expense.getUser().getId()));
 
 		ExpenseCategory expenseCategory = expenseCategoryRepository.findById(expense.getCategory().getId())
 				.orElseThrow(() -> new ResourceNotFoundException(

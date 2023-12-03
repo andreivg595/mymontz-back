@@ -24,6 +24,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,18 +38,23 @@ import lombok.NoArgsConstructor;
 @Table(name = "user")
 public class User implements UserDetails {
 
+	private static final long serialVersionUID = 1L;
+
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-	@Column(name = "username", nullable = false, unique = true)
+	@NotNull
+	@Column(name = "username", unique = true)
 	private String username;
     
+	@NotNull
     @JsonProperty(access = Access.WRITE_ONLY)
-	@Column(name = "password", nullable = false)
+	@Column(name = "password")
     private String password;
     
-    @Column(name = "email", nullable = false, unique = true)
+	@NotNull
+    @Column(name = "email", unique = true)
 	private String email;
 	
     @Enumerated(EnumType.STRING)

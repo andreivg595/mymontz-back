@@ -1,7 +1,5 @@
 package com.back.mymontz.controller;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,7 +43,7 @@ public class UserController {
 	}
 	
 	@GetMapping("/user/username/{username}")
-	public Optional<User> getUserById(@PathVariable String username) {
+	public User getUserByUsername(@PathVariable String username) {
 		return userService.getUserByUsername(username);
 	}
 	
