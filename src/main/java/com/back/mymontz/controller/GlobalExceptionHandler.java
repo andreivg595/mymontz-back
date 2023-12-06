@@ -11,6 +11,7 @@ import com.back.mymontz.exception.ConstraintException;
 import com.back.mymontz.exception.CustomException;
 import com.back.mymontz.exception.DuplicateEntryException;
 import com.back.mymontz.exception.ResourceNotFoundException;
+import com.back.mymontz.exception.UnauthorizedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,9 +35,17 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ResourceNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e) {
-		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(),
 				HttpStatus.NOT_FOUND.getReasonPhrase(), e.getMessage());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+	}
+	
+	@ExceptionHandler(UnauthorizedException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ResponseEntity<ErrorResponse> handleUnautorizedExceptionn(UnauthorizedException e) {
+		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(),
+				HttpStatus.UNAUTHORIZED.getReasonPhrase(), e.getMessage());
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
 	}
 	
 	@ExceptionHandler(CustomException.class)

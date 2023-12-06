@@ -7,6 +7,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import com.back.mymontz.exception.ConstraintException;
 import com.back.mymontz.exception.CustomException;
 import com.back.mymontz.exception.DuplicateEntryException;
 import com.back.mymontz.exception.ResourceNotFoundException;
+import com.back.mymontz.exception.UnauthorizedException;
 import com.back.mymontz.model.User;
 import com.back.mymontz.repository.UserRepository;
 import com.back.mymontz.util.Role;
@@ -99,6 +102,7 @@ public class UserServiceImpl implements UserService {
 		Optional<User> existingUser = userRepository.findById(id);
 
 		try {
+			this.checkAuthorization(existingUser.get().getId());
 			existingUser.get().setUsername(user.getUsername());
 			existingUser.get().setEmail(user.getEmail());
 
@@ -121,5 +125,14 @@ public class UserServiceImpl implements UserService {
 			throw new ResourceNotFoundException("User not exist with id: " + id);
 		}
 		userRepository.deleteById(id);
+	}
+	
+	public void checkAuthorization(Long id) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Long authenticatedUserId = ((User) authentication.getPrincipal()).getId();
+		
+		if (!id.equals(authenticatedUserId)) {
+			throw new UnauthorizedException("You are not authorized to create, access or modify other users data");
+		}
 	}
 }

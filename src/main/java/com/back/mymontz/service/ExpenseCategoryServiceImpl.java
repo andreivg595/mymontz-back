@@ -3,8 +3,11 @@ package com.back.mymontz.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
+import com.back.mymontz.exception.ConstraintException;
+import com.back.mymontz.exception.DuplicateEntryException;
 import com.back.mymontz.exception.ResourceNotFoundException;
 import com.back.mymontz.model.ExpenseCategory;
 import com.back.mymontz.repository.ExpenseCategoryRepository;
@@ -17,11 +20,16 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
 
 	@Override
 	public ExpenseCategory createExpenseCategory(ExpenseCategory expenseCategory) {
-		if (expenseCategoryRepository.existsByType(expenseCategory.getType())) {
-			throw new ResourceNotFoundException("Expense category duplicated of type: " + expenseCategory.getType());
-		}
+		try {
+			if (expenseCategoryRepository.existsByType(expenseCategory.getType())) {
+				throw new ResourceNotFoundException("Expense category duplicated of type: " + expenseCategory.getType());
+			}
 
-		return expenseCategoryRepository.save(expenseCategory);
+			return expenseCategoryRepository.save(expenseCategory);
+		} catch (DataIntegrityViolationException e) {
+			String msg = e.getMessage().substring(0, e.getMessage().indexOf("]") + 1);
+			throw new ConstraintException(msg, e);
+		}
 	}
 
 	@Override
@@ -42,7 +50,7 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
 
 		if (!existingExpenseCategory.getType().equals(expenseCategory.getType())
 				&& expenseCategoryRepository.existsByType(expenseCategory.getType())) {
-			throw new ResourceNotFoundException("Expense category duplicated of type: " + expenseCategory.getType());
+			throw new DuplicateEntryException("Expense category duplicated of type: " + expenseCategory.getType());
 		}
 
 		existingExpenseCategory.setType(expenseCategory.getType());
