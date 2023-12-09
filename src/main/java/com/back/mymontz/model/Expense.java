@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,7 @@ public class Expense {
     @Column(name = "note")
     private String note;
     
-    @Column(name = "image", length = 10000)
+    @Lob
+    @Column(name = "image", columnDefinition = "LONGBLOB")
 	private byte[] image;
 }

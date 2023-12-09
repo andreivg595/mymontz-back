@@ -22,7 +22,8 @@ public class ExpenseCategoryServiceImpl implements ExpenseCategoryService {
 	public ExpenseCategory createExpenseCategory(ExpenseCategory expenseCategory) {
 		try {
 			if (expenseCategoryRepository.existsByType(expenseCategory.getType())) {
-				throw new ResourceNotFoundException("Expense category duplicated of type: " + expenseCategory.getType());
+				throw new ResourceNotFoundException(
+						"Expense category duplicated of type: " + expenseCategory.getType());
 			}
 
 			return expenseCategoryRepository.save(expenseCategory);
