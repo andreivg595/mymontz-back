@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import com.back.mymontz.model.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Header;
@@ -33,6 +34,9 @@ public class JwtService {
 		return Jwts.builder()
 				.setClaims(extraClaims)
 				.setSubject(userDetails.getUsername())
+				.claim("id", ((User) userDetails).getId())
+		        .claim("email", ((User) userDetails).getEmail())
+		        .claim("role", ((User) userDetails).getRole())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + (EXPIRATON_MINUTES * 60 * 1000)))
 				.setHeaderParam(Header.TYPE, Header.JWT_TYPE)
