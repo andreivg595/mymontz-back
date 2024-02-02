@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,8 +18,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.back.mymontz.dto.ExpenseRequest;
 import com.back.mymontz.model.Expense;
 import com.back.mymontz.service.ExpenseService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,9 +35,9 @@ public class ExpenseController {
 	private final ExpenseService expenseService;
 
 	@PostMapping("/expense/create")
-	public Expense createExpense(@RequestPart("body") Expense expense,
-			@RequestPart(value = "imageFile", required = false) MultipartFile file) {
-		return expenseService.createExpense(expense, file);
+	public ResponseEntity<Expense> createExpense(@ModelAttribute ExpenseRequest expenseRequest) {
+	    Expense createdExpense = expenseService.createExpense(expenseRequest);
+        return ResponseEntity.ok(createdExpense);
 	}
 
 	@GetMapping("/expense/expenses/{id}")
@@ -47,9 +52,8 @@ public class ExpenseController {
 	}
 
 	@PutMapping("/expense/update/{id}")
-	public Expense updateExpense(@PathVariable Long id, @RequestPart("body") Expense expense,
-			@RequestPart(value = "imageFile", required = false) MultipartFile file) {
-		return expenseService.updateExpense(id, expense, file);
+	public Expense updateExpense(@PathVariable Long id, @ModelAttribute ExpenseRequest expenseRequest) {
+		return expenseService.updateExpense(id, expenseRequest);
 	}
 
 	@DeleteMapping("/expense/{id}")

@@ -3,6 +3,7 @@ package com.back.mymontz.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.back.mymontz.dto.ExpenseRequest;
 import com.back.mymontz.exception.ConstraintException;
 import com.back.mymontz.exception.CustomException;
 import com.back.mymontz.exception.ResourceNotFoundException;
@@ -40,27 +42,38 @@ public class ExpenseServiceImpl implements ExpenseService {
 	private UserServiceImpl userService;
 
 	@Override
-	public Expense createExpense(Expense expense, MultipartFile file) {
+	public Expense createExpense(ExpenseRequest expenseRequest) {
 		try {
-			userService.checkAuthorization(expense.getUser().getId());
-			User user = userRepository.findById(expense.getUser().getId()).orElseThrow(
-					() -> new ResourceNotFoundException("User not exist with id: " + expense.getUser().getId()));
+			userService.checkAuthorization(expenseRequest.getUserId());
+			User user = userRepository.findById(expenseRequest.getUserId()).orElseThrow(
+					() -> new ResourceNotFoundException("User not exist with id: " + expenseRequest.getUserId()));
 
-			ExpenseCategory expenseCategory = expenseCategoryRepository.findById(expense.getCategory().getId())
+			ExpenseCategory expenseCategory = expenseCategoryRepository.findById(expenseRequest.getCategoryId())
 					.orElseThrow(() -> new ResourceNotFoundException(
-							"Expense category not exists with id: " + expense.getCategory().getId()));
+							"Expense category not exists with id: " + expenseRequest.getCategoryId()));
 			
-			if (file != null) {
+			Expense expense = new Expense();
+			
+			if (expenseRequest.getImageFile() != null) {
 				try {
-					System.out.println("Original Image Byte Size - " + file.getBytes().length);
-					expense.setImage(compressBytes(file.getBytes()));
+					System.out.println("Original Image Byte Size - " + expenseRequest.getImageFile().getBytes().length);
+					expense.setImage(compressBytes(expenseRequest.getImageFile().getBytes()));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
+			
+			try {
+	            LocalDate parsedDate = LocalDate.parse(expenseRequest.getDate());
+	            expense.setDate(parsedDate);
+	        } catch (DateTimeParseException e) {
+	            throw new RuntimeException("Incorrect format. Accepted 'YYYY-MM-DD'");
+	        }
 
 			expense.setUser(user);
 			expense.setCategory(expenseCategory);
+			expense.setAmount(expenseRequest.getAmount());
+	        expense.setNote(expenseRequest.getNote());
 
 			return expenseRepository.save(expense);
 		} catch (DataIntegrityViolationException e) {
@@ -84,7 +97,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 		expenses = expenseRepository.findByUserId(id);
 
 		for (Expense expense : expenses) {
-			expense.setImage(decompressBytes(expense.getImage()));
+			if (expense.getImage() != null) {
+				expense.setImage(decompressBytes(expense.getImage()));
+			}
 		}
 		
 		return expenses;
@@ -108,31 +123,33 @@ public class ExpenseServiceImpl implements ExpenseService {
 		expenses = expenseRepository.findByDateBetweenAndUserId(startDate, endDate, id);
 
 		for (Expense expense : expenses) {
-			expense.setImage(decompressBytes(expense.getImage()));
+			if (expense.getImage() != null) {
+				expense.setImage(decompressBytes(expense.getImage()));
+			}
 		}
 
 		return expenses;
 	}
 
 	@Override
-	public Expense updateExpense(Long id, Expense expense, MultipartFile file) {
+	public Expense updateExpense(Long id, ExpenseRequest expenseRequest) {
 		try {
 			Expense existingExpense = expenseRepository.findById(id)
 					.orElseThrow(() -> new ResourceNotFoundException("Expense not exists with id: " + id));
 
-			userService.checkAuthorization(expense.getUser().getId());
+			userService.checkAuthorization(expenseRequest.getUserId());
 			
-			User user = userRepository.findById(expense.getUser().getId()).orElseThrow(
-					() -> new ResourceNotFoundException("User not exist with id: " + expense.getUser().getId()));
+			User user = userRepository.findById(expenseRequest.getUserId()).orElseThrow(
+					() -> new ResourceNotFoundException("User not exist with id: " + expenseRequest.getUserId()));
 
-			ExpenseCategory expenseCategory = expenseCategoryRepository.findById(expense.getCategory().getId())
+			ExpenseCategory expenseCategory = expenseCategoryRepository.findById(expenseRequest.getCategoryId())
 					.orElseThrow(() -> new ResourceNotFoundException(
-							"Expense category not exists with id: " + expense.getCategory().getId()));
+							"Expense category not exists with id: " + expenseRequest.getCategoryId()));
 
-			if (file != null) {
+			if (expenseRequest.getImageFile() != null) {
 				try {
-					System.out.println("Original Image Byte Size - " + file.getBytes().length);
-					existingExpense.setImage(compressBytes(file.getBytes()));
+					System.out.println("Original Image Byte Size - " + expenseRequest.getImageFile().getBytes().length);
+					existingExpense.setImage(compressBytes(expenseRequest.getImageFile().getBytes()));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -140,9 +157,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
 			existingExpense.setUser(user);
 			existingExpense.setCategory(expenseCategory);
-			existingExpense.setDate(expense.getDate());
-			existingExpense.setAmount(expense.getAmount());
-			existingExpense.setNote(expense.getNote());
+			//existingExpense.setDate(expenseRequest.getDate());
+			existingExpense.setAmount(expenseRequest.getAmount());
+			existingExpense.setNote(expenseRequest.getNote());
 
 			return expenseRepository.save(existingExpense);
 		} catch (DataIntegrityViolationException e) {

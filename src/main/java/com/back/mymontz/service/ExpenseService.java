@@ -6,18 +6,19 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.back.mymontz.dto.ExpenseRequest;
 import com.back.mymontz.model.Expense;
 
 @Service
 public interface ExpenseService {
 
-	Expense createExpense(Expense expense, MultipartFile file);
+	Expense createExpense(ExpenseRequest expenseRequest);
 	
 	List<Expense> getAllExpensesByUserId(Long id);
 	
 	List<Expense> getAllExpensesBetweenDatesAndUserId(Long id, LocalDate startDate, LocalDate endDate);
 	
-	Expense updateExpense(Long id, Expense expense, MultipartFile file);
+	Expense updateExpense(Long id, ExpenseRequest expenseRequest);
 	
 	void deleteExpenseById(Long id);
 }
