@@ -217,4 +217,27 @@ public class ExpenseServiceImpl implements ExpenseService {
 		}
 		return outputStream.toByteArray();
 	}
+
+	@Override
+	public double getTotalAmountByDateAndUserId(LocalDate date, Long id) {
+		userService.checkAuthorization(id);
+		userRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("User not exist with id: " + id));
+		return expenseRepository.getTotalAmountByDateAndUserId(date, id);
+	}
+
+	@Override
+	public double getTotalAmountForWeekAndUserId(LocalDate startOfWeek, LocalDate endOfWeek, Long id) {
+		userService.checkAuthorization(id);
+		userRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("User not exist with id: " + id));
+		return expenseRepository.getTotalAmountForWeekAndUserId(startOfWeek, endOfWeek, id);
+	}
+	
+	public double getTotalAmountForMonthAndUserId(LocalDate startOfMonth, LocalDate endOfMonth, Long id) {
+		userService.checkAuthorization(id);
+		userRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("User not exist with id: " + id));
+		return expenseRepository.getTotalAmountForMonthAndUserId(startOfMonth, endOfMonth, id);
+	}
 }

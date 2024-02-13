@@ -21,4 +21,10 @@ public interface ExpenseService {
 	Expense updateExpense(Long id, ExpenseRequest expenseRequest);
 	
 	void deleteExpenseById(Long id);
+	
+	double getTotalAmountByDateAndUserId(LocalDate date, Long id);
+	
+	double getTotalAmountForWeekAndUserId(LocalDate startOfWeek, LocalDate endOfWeek, Long id);
+	
+	double getTotalAmountForMonthAndUserId(LocalDate startOfMonth, LocalDate endOfMonth, Long id);
 }
